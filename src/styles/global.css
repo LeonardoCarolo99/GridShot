@@ -21,6 +21,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Reserve scrollbar space on every page so the centered nav never shifts. */
+  scrollbar-gutter: stable;
 }
 
 body {
