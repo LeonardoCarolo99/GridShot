@@ -11,6 +11,9 @@ let uploads = [];
 let current = null;
 let isNew = false;
 let dirty = false;
+let portfolio = { photos: [] };
+let portfolioDirty = false;
+let view = 'events';
 
 // ---------- api ----------
 
@@ -26,7 +29,29 @@ async function api(path, opts = {}) {
   return res.json();
 }
 
-// ---------- sidebar ----------
+// ---------- views ----------
+
+function setView(next) {
+  if (next === view) return;
+  if (view === 'events' && dirty && !confirmDiscard()) return;
+  if (view === 'portfolio' && portfolioDirty && !confirm('Discard unsaved portfolio changes?')) return;
+  view = next;
+  updateTabs();
+  renderMain();
+}
+
+function updateTabs() {
+  $$('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === view));
+  $('#new-event').hidden = view !== 'events';
+  $('#event-list').hidden = view !== 'events';
+}
+
+function renderMain() {
+  if (view === 'portfolio') renderPortfolio();
+  else renderEditor();
+}
+
+// ---------- sidebar / events ----------
 
 function renderSidebar() {
   const list = $('#event-list');
@@ -50,13 +75,15 @@ async function loadEvents() {
   events = await api('/api/events');
 }
 
-// ---------- editor ----------
-
 function confirmDiscard() {
   return !dirty || confirm('Discard unsaved changes?');
 }
 
 async function openEvent(slug) {
+  if (view !== 'events') {
+    view = 'events';
+    updateTabs();
+  }
   if (!confirmDiscard()) return;
   const e = await api('/api/events/' + encodeURIComponent(slug));
   current = e;
@@ -75,6 +102,75 @@ function newEvent() {
   renderEditor();
   setTimeout(() => $('[data-field="title"]')?.focus(), 0);
 }
+
+// ---------- gallery component ----------
+
+function thumbHtml(src, i) {
+  return `<div class="thumb" draggable="true" data-index="${i}">
+    <img src="${esc(src)}" alt="" />
+    <button class="thumb-remove" data-remove="${i}" aria-label="Remove photo">&times;</button>
+  </div>`;
+}
+
+const dropzoneHtml = () =>
+  `<div class="dropzone" data-dropzone><span>Drag photos here<br />or click to upload</span></div>`;
+
+function mountGallery({ grid, fileInput, photos, onChange }) {
+  grid.innerHTML = photos.map((src, i) => thumbHtml(src, i)).join('') + dropzoneHtml();
+  const dz = grid.querySelector('[data-dropzone]');
+
+  dz.addEventListener('click', () => fileInput.click());
+  dz.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dz.classList.add('drag');
+  });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    dz.classList.remove('drag');
+    const files = [...e.dataTransfer.files];
+    if (!files.length) return;
+    for (const f of files) photos.push(await uploadFile(f));
+    onChange();
+  });
+
+  fileInput.onchange = async () => {
+    const files = [...fileInput.files];
+    fileInput.value = '';
+    if (!files.length) return;
+    for (const f of files) photos.push(await uploadFile(f));
+    onChange();
+  };
+
+  grid.querySelectorAll('[data-remove]').forEach((b) => {
+    b.onclick = (e) => {
+      e.stopPropagation();
+      photos.splice(Number(b.dataset.remove), 1);
+      onChange();
+    };
+  });
+
+  let dragIndex = null;
+  grid.querySelectorAll('.thumb').forEach((t) => {
+    t.addEventListener('dragstart', () => {
+      dragIndex = Number(t.dataset.index);
+      t.classList.add('dragging');
+    });
+    t.addEventListener('dragend', () => t.classList.remove('dragging'));
+    t.addEventListener('dragover', (e) => e.preventDefault());
+    t.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const to = Number(t.dataset.index);
+      if (dragIndex === null || dragIndex === to) return;
+      const [moved] = photos.splice(dragIndex, 1);
+      photos.splice(to, 0, moved);
+      dragIndex = null;
+      onChange();
+    });
+  });
+}
+
+// ---------- event editor ----------
 
 function renderEditor() {
   const ed = $('#editor');
@@ -122,21 +218,11 @@ function renderEditor() {
         <h2>Gallery <span class="count">${c.photos.length} photo${c.photos.length === 1 ? '' : 's'}</span></h2>
         <button class="btn ghost small" data-gallery-library>Add from library</button>
       </div>
-      <div class="gallery" data-gallery>
-        ${c.photos
-          .map(
-            (src, i) => `
-          <div class="thumb" draggable="true" data-index="${i}">
-            <img src="${esc(src)}" alt="" />
-            <button class="thumb-remove" data-remove="${i}" aria-label="Remove photo">&times;</button>
-          </div>`
-          )
-          .join('')}
-        <div class="dropzone" data-dropzone><span>Drag photos here<br />or click to upload</span></div>
-      </div>
+      <div class="gallery" data-gallery></div>
       <input type="file" accept="image/*" multiple hidden data-file-input />
     </section>
   `;
+
   wireEditor();
 }
 
@@ -189,50 +275,14 @@ function wireEditor() {
     });
   }
 
-  const dz = $('[data-dropzone]');
-  const input = $('[data-file-input]');
-  if (dz && input) {
-    dz.addEventListener('click', () => input.click());
-    dz.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dz.classList.add('drag');
-    });
-    dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
-    dz.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      dz.classList.remove('drag');
-      await addFiles([...e.dataTransfer.files]);
-    });
-    input.onchange = () => addFiles([...input.files]);
-  }
-
-  $$('[data-remove]').forEach((b) => {
-    b.onclick = (e) => {
-      e.stopPropagation();
-      current.photos.splice(Number(b.dataset.remove), 1);
+  mountGallery({
+    grid: $('[data-gallery]'),
+    fileInput: $('[data-file-input]'),
+    photos: current.photos,
+    onChange: () => {
       dirty = true;
       renderEditor();
-    };
-  });
-
-  let dragIndex = null;
-  $$('.thumb').forEach((t) => {
-    t.addEventListener('dragstart', () => {
-      dragIndex = Number(t.dataset.index);
-      t.classList.add('dragging');
-    });
-    t.addEventListener('dragend', () => t.classList.remove('dragging'));
-    t.addEventListener('dragover', (e) => e.preventDefault());
-    t.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const to = Number(t.dataset.index);
-      if (dragIndex === null || dragIndex === to) return;
-      const [moved] = current.photos.splice(dragIndex, 1);
-      current.photos.splice(to, 0, moved);
-      dragIndex = null;
-      dirty = true;
-      renderEditor();
-    });
+    },
   });
 
   $('[data-gallery-library]')?.addEventListener('click', () =>
@@ -244,12 +294,61 @@ function wireEditor() {
   );
 }
 
-async function addFiles(files) {
-  if (!files.length) return;
-  for (const f of files) current.photos.push(await uploadFile(f));
-  dirty = true;
-  renderEditor();
+// ---------- portfolio editor ----------
+
+function renderPortfolio() {
+  const ed = $('#editor');
+  ed.innerHTML = `
+    <div class="editor-head">
+      <div>
+        <p class="eyebrow">Landing page</p>
+        <h1>Portfolio</h1>
+        <p class="muted" style="margin:.4rem 0 0">Pick the photos that appear in the Portfolio grid. Drag to order, click &times; to remove.</p>
+      </div>
+      <div class="actions"><button class="btn" data-save-portfolio>Save</button></div>
+    </div>
+    <section class="block">
+      <div class="block-head">
+        <h2>Selected photos <span class="count">${portfolio.photos.length}</span></h2>
+        <button class="btn ghost small" data-gallery-library>Add from library</button>
+      </div>
+      <div class="gallery" data-gallery></div>
+      <input type="file" accept="image/*" multiple hidden data-file-input />
+    </section>
+  `;
+
+  mountGallery({
+    grid: $('[data-gallery]'),
+    fileInput: $('[data-file-input]'),
+    photos: portfolio.photos,
+    onChange: () => {
+      portfolioDirty = true;
+      renderPortfolio();
+    },
+  });
+
+  $('[data-gallery-library]').onclick = () =>
+    openLibrary((paths) => {
+      portfolio.photos.push(...paths);
+      portfolioDirty = true;
+      renderPortfolio();
+    });
+
+  $('[data-save-portfolio]').onclick = savePortfolio;
 }
+
+async function savePortfolio() {
+  try {
+    portfolio = await api('/api/portfolio', { method: 'PUT', body: JSON.stringify({ photos: portfolio.photos }) });
+    portfolioDirty = false;
+    renderPortfolio();
+    toast('Portfolio saved');
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+// ---------- uploads / library ----------
 
 function pickFile(cb) {
   const input = document.createElement('input');
@@ -260,8 +359,6 @@ function pickFile(cb) {
   };
   input.click();
 }
-
-// ---------- uploads ----------
 
 function readAsDataURL(file) {
   return new Promise((resolve, reject) => {
@@ -280,8 +377,6 @@ async function uploadFile(file) {
   });
   return path;
 }
-
-// ---------- library modal ----------
 
 async function openLibrary(onPick) {
   uploads = await api('/api/uploads');
@@ -337,7 +432,7 @@ async function openLibrary(onPick) {
   };
 }
 
-// ---------- save / delete ----------
+// ---------- save / delete event ----------
 
 async function save() {
   if (!current.title.trim()) return toast('Title is required', true);
@@ -392,6 +487,7 @@ function toast(msg, error = false) {
 // ---------- boot ----------
 
 $('#new-event').onclick = newEvent;
+$$('.tab').forEach((t) => (t.onclick = () => setView(t.dataset.view)));
 
 (async () => {
   try {
@@ -399,6 +495,10 @@ $('#new-event').onclick = newEvent;
   } catch (e) {
     toast('Could not load events: ' + e.message, true);
   }
+  try {
+    portfolio = await api('/api/portfolio');
+  } catch {}
   renderSidebar();
-  renderEditor();
+  updateTabs();
+  renderMain();
 })();

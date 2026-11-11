@@ -11,6 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const EVENTS_DIR = path.join(ROOT, 'src', 'content', 'events');
 const UPLOADS_DIR = path.join(ROOT, 'public', 'uploads');
+const DATA_DIR = path.join(ROOT, 'src', 'data');
+const PORTFOLIO_FILE = path.join(DATA_DIR, 'portfolio.json');
 const UI_DIR = path.join(__dirname, 'ui');
 const PORT = Number(process.env.ADMIN_PORT || 4000);
 const MAX_BODY = 80 * 1024 * 1024;
@@ -171,6 +173,21 @@ async function saveUpload({ name = 'photo', dataUrl }) {
   return '/uploads/' + file;
 }
 
+async function readPortfolio() {
+  try {
+    const data = JSON.parse(await fs.readFile(PORTFOLIO_FILE, 'utf8'));
+    return { photos: Array.isArray(data.photos) ? data.photos.filter(Boolean) : [] };
+  } catch {
+    return { photos: [] };
+  }
+}
+
+async function writePortfolio(data) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  const photos = Array.isArray(data.photos) ? data.photos.filter(Boolean) : [];
+  await fs.writeFile(PORTFOLIO_FILE, JSON.stringify({ photos }, null, 2) + '\n', 'utf8');
+}
+
 // ---------- http ----------
 
 function readBody(req) {
@@ -247,6 +264,13 @@ async function api(req, res, p) {
     } catch (e) {
       return json(res, 400, { error: e.message });
     }
+  }
+
+  if (p === '/api/portfolio' && req.method === 'GET') return json(res, 200, await readPortfolio());
+  if (p === '/api/portfolio' && req.method === 'PUT') {
+    const body = JSON.parse((await readBody(req)) || '{}');
+    await writePortfolio(body);
+    return json(res, 200, await readPortfolio());
   }
 
   json(res, 404, { error: 'Not found.' });

@@ -26,7 +26,8 @@ A purpose-built local editor that writes straight into your repo — no server, 
 - Event list with cover thumbnails; create / edit / delete.
 - **Cover image:** drag-and-drop upload, or pick from the media library.
 - **Gallery:** drag-and-drop multiple photos at once, drag thumbnails to reorder, `×` to remove.
-- **Save** writes `src/content/events/<slug>.md` and puts uploads in `public/uploads/`.
+- **Portfolio tab:** hand-pick exactly which photos appear in the landing-page grid (drag to order, save). Until you pick some, the grid falls back to recent event shots.
+- **Save** writes `src/content/events/<slug>.md`, the portfolio list to `src/data/portfolio.json`, and uploads to `public/uploads/`.
 
 Because it runs locally, your workflow is: `npm run admin` → edit → commit and push → Netlify rebuilds. (If you later want to edit from the live domain, that needs a small authenticated backend.)
 

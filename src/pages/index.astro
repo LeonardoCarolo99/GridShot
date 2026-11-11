@@ -3,15 +3,17 @@ import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import Gallery from '../components/Gallery.astro';
 import { SITE } from '../site';
+import portfolio from '../data/portfolio.json';
 
 const events = (await getCollection('events')).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 
-// Featured grid: recent event covers + a few gallery shots.
-const featured = events
-  .flatMap((e) => [e.data.cover, ...e.data.photos])
-  .slice(0, 9);
+// Curated in the admin's Portfolio tab; falls back to recent event shots until set.
+const curated = Array.isArray(portfolio.photos) ? portfolio.photos.filter(Boolean) : [];
+const featured = curated.length
+  ? curated
+  : events.flatMap((e) => [e.data.cover, ...e.data.photos]).slice(0, 9);
 
 const latest = events[0];
 ---
