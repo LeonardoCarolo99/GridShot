@@ -10,7 +10,7 @@ const { photos, alt = 'Motorsport photograph' } = Astro.props;
 <div class="gallery" data-gallery>
   {photos.map((src, i) => (
     <figure class="item" data-src={src}>
-      <img src={src} alt={`${alt} ${i + 1}`} loading="lazy" width="1600" height="1067" />
+      <img src={src} alt={`${alt} ${i + 1}`} loading="lazy" />
     </figure>
   ))}
 </div>
@@ -80,6 +80,7 @@ const { photos, alt = 'Motorsport photograph' } = Astro.props;
 
   .gallery img {
     width: 100%;
+    height: auto;
     transition: transform 0.4s ease, opacity 0.4s ease;
   }
 

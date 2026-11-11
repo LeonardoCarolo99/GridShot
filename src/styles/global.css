@@ -23,6 +23,29 @@ html {
   scroll-behavior: smooth;
   /* Reserve scrollbar space on every page so the centered nav never shifts. */
   scrollbar-gutter: stable;
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #4a0f0b var(--bg);
+}
+
+/* Chromium / WebKit scrollbar — dark track, dark-red thumb that lights up on hover */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a0f0b;
+  border: 2px solid var(--bg);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 body {
