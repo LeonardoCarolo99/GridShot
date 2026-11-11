@@ -19,6 +19,17 @@ npm run dev
 
 Open the printed local URL. Build with `npm run build`, preview with `npm run preview`.
 
+## Adding events locally (no deploy needed)
+
+The backoffice runs on your machine against your local files — no Netlify account required yet.
+
+1. Terminal A: `npm run dev`
+2. Terminal B: `npm run cms`
+3. Open `http://localhost:4321/admin/index.html` and click **Login**.
+4. Create / edit / delete events and upload photos. **Publish** writes straight into `src/content/events/` and `public/uploads/`.
+
+`local_backend: true` in `public/admin/config.yml` makes this work on localhost only; the deployed site uses Netlify Identity + Git Gateway instead.
+
 ## Make it yours
 
 Edit **`src/site.ts`** to set your name, tagline, location, email and Instagram. The whole site reads from this file.

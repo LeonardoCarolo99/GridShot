@@ -10,18 +10,8 @@ const events = defineCollection({
     series: z.string().optional(),
     cover: z.string(),
     description: z.string(),
-    // Decap may write list items as plain strings or {photo:...} objects — accept both.
-    photos: z
-      .array(
-        z
-          .union([
-            z.string(),
-            z.object({ photo: z.string() }),
-            z.object({ image: z.string() }),
-            z.object({ src: z.string() }),
-          ])
-          .transform((v) => (typeof v === 'string' ? v : (v.photo ?? v.image ?? v.src)))
-      ),
+    // Decap omits this key when no photos are set — default to an empty list.
+    photos: z.array(z.string()).default([]),
   }),
 });
 
