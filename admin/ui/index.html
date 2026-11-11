@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin — Motorsport</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="mark" aria-hidden="true"></span>
+          <span>MOTORSPORT</span>
+          <small>ADMIN</small>
+        </div>
+        <button id="new-event" class="btn">+ New event</button>
+        <div id="event-list" class="event-list"></div>
+        <a class="site-link" href="http://localhost:4321" target="_blank" rel="noopener">Open site preview ↗</a>
+      </aside>
+      <main class="main">
+        <div id="editor"></div>
+      </main>
+    </div>
+    <div id="modal" class="modal" hidden></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

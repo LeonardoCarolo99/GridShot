@@ -10,7 +10,7 @@ const events = defineCollection({
     series: z.string().optional(),
     cover: z.string(),
     description: z.string(),
-    // Decap omits this key when no photos are set — default to an empty list.
+    // Allow events saved without a gallery — default to an empty list.
     photos: z.array(z.string()).default([]),
   }),
 });

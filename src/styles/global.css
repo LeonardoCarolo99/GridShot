@@ -212,8 +212,3 @@ button {
 .site-footer a:hover {
   color: var(--accent);
 }
-
-/* Admin link (small, in footer) */
-.admin-link {
-  font-size: 0.8rem;
-}

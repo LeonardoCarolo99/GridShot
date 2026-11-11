@@ -1,6 +1,6 @@
 # Motorsport Photography Portfolio
 
-A sleek black-and-red portfolio site built with [Astro](https://astro.build), a free Git-based backoffice ([Decap CMS](https://decapcms.org)) and free hosting/forms on Netlify. You only pay for the domain.
+A sleek black-and-red portfolio site built with [Astro](https://astro.build), plus a dedicated local admin for managing events and photos. Free to host on Netlify — you only pay for the domain.
 
 ## Pages
 
@@ -8,37 +8,35 @@ A sleek black-and-red portfolio site built with [Astro](https://astro.build), a 
 - **Events** (`/events`) — list of events, each with its own gallery
 - **About** (`/about`) — bio + stats
 - **Contact** (`/contact`) — Netlify form → your inbox
-- **Admin** (`/admin`) — Decap CMS backoffice to add/edit events and upload photos
 
 ## Local development
 
 ```sh
 npm install
-npm run dev
+npm run dev     # site      → http://localhost:4321
+npm run admin   # admin     → http://localhost:4000
 ```
 
-Open the printed local URL. Build with `npm run build`, preview with `npm run preview`.
+Run both together to edit and preview side by side (the admin has an "Open site preview" link). Build with `npm run build`, preview the build with `npm run preview`.
 
-## Adding events locally (no deploy needed)
+## The admin
 
-The backoffice runs on your machine against your local files — no Netlify account required yet.
+A purpose-built local editor that writes straight into your repo — no server, database, auth or monthly cost.
 
-1. Terminal A: `npm run dev`
-2. Terminal B: `npm run cms`
-3. Open `http://localhost:4321/admin/index.html` and click **Login**.
-4. Create / edit / delete events and upload photos. **Publish** writes straight into `src/content/events/` and `public/uploads/`.
+- Event list with cover thumbnails; create / edit / delete.
+- **Cover image:** drag-and-drop upload, or pick from the media library.
+- **Gallery:** drag-and-drop multiple photos at once, drag thumbnails to reorder, `×` to remove.
+- **Save** writes `src/content/events/<slug>.md` and puts uploads in `public/uploads/`.
 
-`local_backend: true` in `public/admin/config.yml` makes this work on localhost only; the deployed site uses Netlify Identity + Git Gateway instead.
+Because it runs locally, your workflow is: `npm run admin` → edit → commit and push → Netlify rebuilds. (If you later want to edit from the live domain, that needs a small authenticated backend.)
 
 ## Make it yours
 
 Edit **`src/site.ts`** to set your name, tagline, location, email and Instagram. The whole site reads from this file.
 
-## Adding an event
+## Adding an event by hand
 
-**Option A — via the backoffice (recommended):** log in at `/admin`, click *Events → New Event*, fill the form and upload photos. Save publishes it.
-
-**Option B — by hand:** drop a markdown file in `src/content/events/` and put photos in `public/uploads/`:
+You can also drop a markdown file in `src/content/events/` and put photos in `public/uploads/`:
 
 ```md
 ---
@@ -54,18 +52,16 @@ photos:
 ---
 ```
 
-## Placeholder images
+## Photos
 
-`scripts/gen-placeholders.mjs` generates the branded SVG placeholders in `public/uploads/` (they're in the repo now). Replace them with real photos — via `/admin` or by dropping files into `public/uploads/` — and delete the ones you don't use. Real `.jpg` uploads through the CMS land in the same folder.
+Drop real photos into `public/uploads/` or upload them through the admin. The admin's media library lists everything in that folder. `scripts/gen-placeholders.mjs` can regenerate the branded SVG placeholders if you ever need them.
 
 ## Deploy to Netlify (free)
 
 1. Push this repo to GitHub.
-2. In Netlify: **Add new site → Import from Git** → pick the repo. Build settings are already in `netlify.toml`.
-3. **Enable the backoffice:** Netlify → *Site settings → Identity* → Enable Identity → *Registration* set to *Invite only* → *Services → Git Gateway* → Enable.
-4. **Invite yourself:** Identity → *Invite users* → your email → open the link → now `/admin` works.
-5. **Contact form:** Netlify → *Site settings → Forms* → the `contact` form appears automatically once it receives a submission. Set your notification email under *Forms → Settings and usage*.
-6. **Domain:** Netlify → *Domain settings* → add your custom domain and point its DNS at Netlify. This is the only thing you pay for.
+2. Netlify: **Add new site → Import from Git** → pick the repo. Build settings are already in `netlify.toml`.
+3. **Contact form:** Netlify → *Site settings → Forms* → the `contact` form appears after its first submission. Set your notification email under *Forms → Settings and usage*.
+4. **Domain:** Netlify → *Domain settings* → add your custom domain and point its DNS at Netlify. This is the only thing you pay for.
 
 ## Free-tier limits (Netlify)
 
