@@ -1,0 +1,98 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Gallery from '../../components/Gallery.astro';
+import { SITE } from '../../site';
+
+export async function getStaticPaths() {
+  const events = await getCollection('events');
+  return events.map((event) => ({
+    params: { slug: event.id },
+    props: { event },
+  }));
+}
+
+const { event } = Astro.props;
+const { title, date, location, series, cover, description, photos } = event.data;
+const dateStr = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+---
+
+<Layout title={`${title} — ${SITE.name}`} description={description}>
+  <section class="event-head">
+    <img class="head-img" src={cover} alt={`${title} cover`} width="1600" height="1000" />
+    <div class="head-veil"></div>
+    <div class="container head-content">
+      <p class="eyebrow">{series ?? 'Event'}</p>
+      <h1>{title}</h1>
+      <p class="meta">
+        <time datetime={date.toISOString()}>{dateStr}</time>
+        <span class="dot" aria-hidden="true"></span>
+        {location}
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Gallery</p>
+          <h2>{photos.length} photographs</h2>
+        </div>
+        <a class="btn ghost" href="/events/">All events</a>
+      </div>
+      {description && <p class="lead">{description}</p>}
+      <div class="gallery-wrap">
+        <Gallery photos={photos} alt={title} />
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .event-head {
+    position: relative;
+    min-height: 52vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .head-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .head-veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 10, 12, 0.25) 0%, rgba(10, 10, 12, 0.6) 60%, var(--bg) 100%);
+  }
+
+  .head-content {
+    position: relative;
+    padding-bottom: clamp(2rem, 5vw, 4rem);
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .gallery-wrap {
+    margin-top: 2rem;
+  }
+</style>

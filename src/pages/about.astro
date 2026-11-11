@@ -1,0 +1,94 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE } from '../site';
+---
+
+<Layout title={`About — ${SITE.name}`} description={`About ${SITE.photographer}, ${SITE.tagline.toLowerCase()}.`}>
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">About me</p>
+      <h1>{SITE.photographer}</h1>
+      <p class="lead">{SITE.tagline} — {SITE.location}</p>
+
+      <div class="about-grid">
+        <div class="bio">
+          <p>
+            Replace this with your story. Explain how you got into motorsport photography,
+            the series you cover, and what you bring to a team or publication: reliability,
+            access, and images that capture the speed and drama of the sport.
+          </p>
+          <p>
+            Talk about the equipment you shoot with and the access you have, then close with
+            what a client gets when they hire you — fast delivery, edited selects, and
+            images ready for press or social.
+          </p>
+        </div>
+
+        <aside class="facts">
+          <div class="fact">
+            <span class="fact-num">10+</span>
+            <span class="fact-label">Years shooting motorsport</span>
+          </div>
+          <div class="fact">
+            <span class="fact-num">60+</span>
+            <span class="fact-label">Events covered</span>
+          </div>
+          <div class="fact">
+            <span class="fact-num">120k</span>
+            <span class="fact-label">Photos delivered</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    margin-top: clamp(2rem, 5vw, 3rem);
+  }
+
+  .bio p {
+    color: var(--muted);
+    font-size: 1.05rem;
+  }
+
+  .facts {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .fact {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fact-num {
+    font-family: var(--font-head);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .fact-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.35rem;
+  }
+
+  @media (max-width: 720px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

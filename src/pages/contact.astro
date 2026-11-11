@@ -1,0 +1,173 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE } from '../site';
+---
+
+<Layout title={`Contact — ${SITE.name}`} description={`Get in touch with ${SITE.photographer} for motorsport photography.`}>
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Contact</p>
+      <h1>Let's work together</h1>
+      <p class="lead">
+        Event coverage, team commissions or editorial — send a message and I'll get back to you.
+        Prefer email? Reach me at <a class="mailto" href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+      </p>
+
+      <div class="contact-grid">
+        <form class="form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="contact" />
+          <p class="visually-hidden">
+            <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+          </p>
+
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" required autocomplete="name" />
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="email" />
+          </div>
+
+          <div class="field">
+            <label for="subject">Subject</label>
+            <input id="subject" name="subject" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="6" required></textarea>
+          </div>
+
+          <button class="btn" type="submit">Send message</button>
+        </form>
+
+        <aside class="direct">
+          <h3>Direct</h3>
+          <ul>
+            <li>
+              <span class="k">Email</span>
+              <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+            </li>
+            <li>
+              <span class="k">Instagram</span>
+              <a href={SITE.instagram} target="_blank" rel="noopener">{SITE.instagramHandle}</a>
+            </li>
+            <li>
+              <span class="k">Base</span>
+              <span>{SITE.location}</span>
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .mailto {
+    color: var(--accent);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    margin-top: clamp(2rem, 5vw, 3rem);
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .field label {
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .field input,
+  .field textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.75rem 0.9rem;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .field textarea {
+    resize: vertical;
+  }
+
+  .form .btn {
+    align-self: flex-start;
+  }
+
+  .direct {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem;
+  }
+
+  .direct h3 {
+    font-size: 1.1rem;
+  }
+
+  .direct ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .direct li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .direct .k {
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--accent);
+  }
+
+  .direct a {
+    color: var(--muted);
+  }
+
+  .direct a:hover {
+    color: var(--text);
+  }
+
+  @media (max-width: 720px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

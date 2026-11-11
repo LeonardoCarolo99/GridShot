@@ -1,0 +1,102 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  date: Date;
+  location: string;
+  series?: string;
+  cover: string;
+}
+
+const { href, title, date, location, series, cover } = Astro.props;
+const dateStr = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+---
+
+<a class="card" href={href}>
+  <div class="cover">
+    <img src={cover} alt={`${title} cover`} loading="lazy" width="1600" height="1000" />
+    {series && <span class="series">{series}</span>}
+  </div>
+  <div class="meta">
+    <h3>{title}</h3>
+    <p class="sub">
+      <time datetime={date.toISOString()}>{dateStr}</time>
+      <span class="dot" aria-hidden="true"></span>
+      {location}
+    </p>
+  </div>
+</a>
+
+<style>
+  .card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+
+  .cover {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+
+  .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+
+  .card:hover .cover img {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+
+  .series {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.65rem;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.3rem 0.55rem;
+    border-radius: 2px;
+  }
+
+  .meta {
+    padding: 1.1rem 1.25rem 1.3rem;
+  }
+
+  .meta h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .sub {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+</style>

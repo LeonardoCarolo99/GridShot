@@ -1,0 +1,173 @@
+---
+import { SITE } from '../site';
+
+const links = [
+  { href: '/', label: 'Portfolio' },
+  { href: '/events/', label: 'Events' },
+  { href: '/about/', label: 'About' },
+  { href: '/contact/', label: 'Contact' },
+];
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href.replace(/\/$/, ''));
+---
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">{SITE.name}</span>
+    </a>
+
+    <button class="burger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links" data-burger>
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="links" id="nav-links" data-links>
+      {links.map((l) => (
+        <a href={l.href} class:list={[{ active: isActive(l.href) }]}>{l.label}</a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  const burger = document.querySelector('[data-burger]');
+  const links = document.querySelector('[data-links]');
+  burger?.addEventListener('click', () => {
+    const open = links?.classList.toggle('open') ?? false;
+    burger.setAttribute('aria-expanded', String(open));
+    burger.classList.toggle('open', open);
+  });
+</script>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    height: var(--nav-h);
+  }
+
+  .nav-inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.12em;
+  }
+
+  .brand-mark {
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    transform: skew(-12deg);
+  }
+
+  .links {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.25rem);
+  }
+
+  .links a {
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--muted);
+    padding: 0.35rem 0;
+    position: relative;
+    transition: color 0.15s;
+  }
+
+  .links a:hover {
+    color: var(--text);
+  }
+
+  .links a.active {
+    color: var(--text);
+  }
+
+  .links a.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+  }
+
+  .burger span {
+    width: 22px;
+    height: 2px;
+    background: var(--text);
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  .burger.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .burger.open span:nth-child(2) {
+    opacity: 0;
+  }
+  .burger.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  @media (max-width: 720px) {
+    .burger {
+      display: flex;
+    }
+
+    .links {
+      position: fixed;
+      inset: var(--nav-h) 0 auto 0;
+      flex-direction: column;
+      align-items: stretch;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem clamp(1.25rem, 4vw, 2.5rem) 1.5rem;
+      display: none;
+    }
+
+    .links.open {
+      display: flex;
+    }
+
+    .links a {
+      padding: 0.85rem 0;
+      font-size: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .links a:last-child {
+      border-bottom: none;
+    }
+  }
+</style>

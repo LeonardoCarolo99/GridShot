@@ -1,0 +1,145 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Gallery from '../components/Gallery.astro';
+import { SITE } from '../site';
+
+const events = (await getCollection('events')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+// Featured grid: recent event covers + a few gallery shots.
+const featured = events
+  .flatMap((e) => [e.data.cover, ...e.data.photos])
+  .slice(0, 9);
+
+const latest = events[0];
+---
+
+<Layout title={`${SITE.name} — ${SITE.tagline}`}>
+  <section class="hero">
+    <img class="hero-img" src="/uploads/hero.svg" alt="" width="1920" height="1080" />
+    <div class="hero-veil"></div>
+    <div class="container hero-content">
+      <p class="eyebrow">{SITE.tagline}</p>
+      <h1>Capturing<br /><span class="accent">Speed</span> at its limit</h1>
+      <p class="lead">Rally, GT and single-seater action — photographed trackside for teams, drivers and media.</p>
+      <div class="hero-actions">
+        <a class="btn" href="/events/">View Events</a>
+        <a class="btn ghost" href="/contact/">Work with me</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Selected work</p>
+          <h2>Portfolio</h2>
+        </div>
+        <a class="btn ghost" href="/events/">All events</a>
+      </div>
+      <Gallery photos={featured} />
+    </div>
+  </section>
+
+  {latest && (
+    <section class="section latest">
+      <div class="container">
+        <div class="latest-card">
+          <div class="latest-copy">
+            <p class="eyebrow">Latest event</p>
+            <h2>{latest.data.title}</h2>
+            <p class="lead">{latest.data.description}</p>
+            <a class="btn" href={`/events/${latest.id}/`}>View gallery</a>
+          </div>
+          <a class="latest-cover" href={`/events/${latest.id}/`}>
+            <img src={latest.data.cover} alt={`${latest.data.title} cover`} loading="lazy" width="1600" height="1000" />
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 82vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 10, 12, 0.35) 0%, rgba(10, 10, 12, 0.55) 45%, var(--bg) 100%);
+  }
+
+  .hero-content {
+    position: relative;
+    padding-bottom: clamp(3rem, 8vw, 6rem);
+  }
+
+  .hero h1 {
+    max-width: 12ch;
+  }
+
+  .hero .lead {
+    margin-bottom: 1.75rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .latest-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .latest-cover {
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .latest-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 16 / 10;
+    transition: transform 0.4s ease;
+  }
+
+  .latest-cover:hover img {
+    transform: scale(1.03);
+  }
+
+  @media (max-width: 720px) {
+    .latest-card {
+      grid-template-columns: 1fr;
+    }
+    .latest-cover {
+      order: -1;
+    }
+  }
+</style>

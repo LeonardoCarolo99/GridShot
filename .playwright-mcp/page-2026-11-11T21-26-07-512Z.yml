@@ -1,0 +1,65 @@
+- generic [active] [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - generic [ref=f2e3]:
+      - link "MOTORSPORT" [ref=f2e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=f2e7]:
+        - link "Portfolio" [ref=f2e8] [cursor=pointer]:
+          - /url: /
+        - link "Events" [ref=f2e9] [cursor=pointer]:
+          - /url: /events/
+        - link "About" [ref=f2e10] [cursor=pointer]:
+          - /url: /about/
+        - link "Contact" [ref=f2e11] [cursor=pointer]:
+          - /url: /contact/
+  - main [ref=f2e12]:
+    - generic [ref=f2e15]:
+      - paragraph [ref=f2e16]: Motorsport Photographer
+      - heading "Capturing Speed at its limit" [level=1] [ref=f2e17]: CapturingSpeed at its limit
+      - paragraph [ref=f2e18]: Rally, GT and single-seater action — photographed trackside for teams, drivers and media.
+      - generic [ref=f2e19]:
+        - link "View Events" [ref=f2e20] [cursor=pointer]:
+          - /url: /events/
+        - link "Work with me" [ref=f2e21] [cursor=pointer]:
+          - /url: /contact/
+    - generic [ref=f2e23]:
+      - generic [ref=f2e24]:
+        - generic [ref=f2e25]:
+          - paragraph [ref=f2e26]: Selected work
+          - heading "Portfolio" [level=2] [ref=f2e27]
+        - link "All events" [ref=f2e28] [cursor=pointer]:
+          - /url: /events/
+      - generic [ref=f2e29]:
+        - figure [ref=f2e30]:
+          - img "Motorsport photograph 1" [ref=f2e31]
+        - figure [ref=f2e32]:
+          - img "Motorsport photograph 2" [ref=f2e33]
+        - figure [ref=f2e34]:
+          - img "Motorsport photograph 3" [ref=f2e35]
+        - figure [ref=f2e36]:
+          - img "Motorsport photograph 4" [ref=f2e37]
+        - figure [ref=f2e38]:
+          - img "Motorsport photograph 5" [ref=f2e39]
+        - figure [ref=f2e40]:
+          - img "Motorsport photograph 6" [ref=f2e41]
+        - figure [ref=f2e42]:
+          - img "Motorsport photograph 7" [ref=f2e43]
+        - figure [ref=f2e44]:
+          - img "Motorsport photograph 8" [ref=f2e45]
+        - figure [ref=f2e46]:
+          - img "Motorsport photograph 9" [ref=f2e47]
+    - generic [ref=f2e50]:
+      - generic [ref=f2e51]:
+        - paragraph [ref=f2e52]: Latest event
+        - heading "F1 Monza 2026" [level=2] [ref=f2e53]
+        - paragraph [ref=f2e54]: The Temple of Speed. Monza delivers flat-out braking, glowing discs and the raw spectacle of Formula 1 at full tilt.
+        - link "View gallery" [ref=f2e55] [cursor=pointer]:
+          - /url: /events/f1-monza-2026/
+      - link [ref=f2e56] [cursor=pointer]:
+        - /url: /events/f1-monza-2026/
+        - img "F1 Monza 2026 cover" [ref=f2e57]
+  - contentinfo [ref=f2e58]:
+    - generic [ref=f2e59]:
+      - generic [ref=f2e60]: © 2026 MOTORSPORT — Motorsport Photographer
+      - link "Admin" [ref=f2e61] [cursor=pointer]:
+        - /url: /admin/
