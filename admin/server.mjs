@@ -176,16 +176,20 @@ async function saveUpload({ name = 'photo', dataUrl }) {
 async function readPortfolio() {
   try {
     const data = JSON.parse(await fs.readFile(PORTFOLIO_FILE, 'utf8'));
-    return { photos: Array.isArray(data.photos) ? data.photos.filter(Boolean) : [] };
+    return {
+      hero: typeof data.hero === 'string' ? data.hero : '',
+      photos: Array.isArray(data.photos) ? data.photos.filter(Boolean) : [],
+    };
   } catch {
-    return { photos: [] };
+    return { hero: '', photos: [] };
   }
 }
 
 async function writePortfolio(data) {
   await fs.mkdir(DATA_DIR, { recursive: true });
+  const hero = typeof data.hero === 'string' ? data.hero : '';
   const photos = Array.isArray(data.photos) ? data.photos.filter(Boolean) : [];
-  await fs.writeFile(PORTFOLIO_FILE, JSON.stringify({ photos }, null, 2) + '\n', 'utf8');
+  await fs.writeFile(PORTFOLIO_FILE, JSON.stringify({ hero, photos }, null, 2) + '\n', 'utf8');
 }
 
 // ---------- http ----------

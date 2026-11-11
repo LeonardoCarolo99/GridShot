@@ -11,7 +11,7 @@ let uploads = [];
 let current = null;
 let isNew = false;
 let dirty = false;
-let portfolio = { photos: [] };
+let portfolio = { hero: '', photos: [] };
 let portfolioDirty = false;
 let view = 'events';
 
@@ -303,10 +303,25 @@ function renderPortfolio() {
       <div>
         <p class="eyebrow">Landing page</p>
         <h1>Portfolio</h1>
-        <p class="muted" style="margin:.4rem 0 0">Pick the photos that appear in the Portfolio grid. Drag to order, click &times; to remove.</p>
+        <p class="muted" style="margin:.4rem 0 0">Set the hero image and pick the photos in the Portfolio grid. Drag to order, click &times; to remove.</p>
       </div>
       <div class="actions"><button class="btn" data-save-portfolio>Save</button></div>
     </div>
+
+    <section class="block">
+      <div class="block-head">
+        <h2>Hero image</h2>
+        <button class="btn ghost small" data-hero-library>Choose from library</button>
+      </div>
+      <div class="cover ${portfolio.hero ? 'has' : ''}" data-hero>
+        ${
+          portfolio.hero
+            ? `<img src="${esc(portfolio.hero)}" alt="Hero" /><button class="cover-change btn ghost small" data-hero-change>Replace</button>`
+            : `<div class="cover-empty">Drag an image here, or click to upload (PNG, JPG, WebP)</div>`
+        }
+      </div>
+    </section>
+
     <section class="block">
       <div class="block-head">
         <h2>Selected photos <span class="count">${portfolio.photos.length}</span></h2>
@@ -316,6 +331,8 @@ function renderPortfolio() {
       <input type="file" accept="image/*" multiple hidden data-file-input />
     </section>
   `;
+
+  wireHero();
 
   mountGallery({
     grid: $('[data-gallery]'),
@@ -337,9 +354,47 @@ function renderPortfolio() {
   $('[data-save-portfolio]').onclick = savePortfolio;
 }
 
+function wireHero() {
+  $('[data-hero-library]')?.addEventListener('click', () =>
+    openLibrary((paths) => {
+      if (paths[0]) portfolio.hero = paths[0];
+      portfolioDirty = true;
+      renderPortfolio();
+    })
+  );
+
+  const hero = $('[data-hero]');
+  if (!hero) return;
+  hero.addEventListener('click', (e) => {
+    if (e.target.closest('[data-hero-change]')) return;
+    pickFile(async (path) => {
+      portfolio.hero = path;
+      portfolioDirty = true;
+      renderPortfolio();
+    });
+  });
+  hero.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    hero.classList.add('drag');
+  });
+  hero.addEventListener('dragleave', () => hero.classList.remove('drag'));
+  hero.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    hero.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    portfolio.hero = await uploadFile(f);
+    portfolioDirty = true;
+    renderPortfolio();
+  });
+}
+
 async function savePortfolio() {
   try {
-    portfolio = await api('/api/portfolio', { method: 'PUT', body: JSON.stringify({ photos: portfolio.photos }) });
+    portfolio = await api('/api/portfolio', {
+      method: 'PUT',
+      body: JSON.stringify({ hero: portfolio.hero, photos: portfolio.photos }),
+    });
     portfolioDirty = false;
     renderPortfolio();
     toast('Portfolio saved');

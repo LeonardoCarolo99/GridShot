@@ -15,12 +15,14 @@ const featured = curated.length
   ? curated
   : events.flatMap((e) => [e.data.cover, ...e.data.photos]).slice(0, 9);
 
+const heroImage = portfolio.hero || events[0]?.data.cover || '/uploads/hero.svg';
+
 const latest = events[0];
 ---
 
 <Layout title={`${SITE.name} — ${SITE.tagline}`}>
   <section class="hero">
-    <img class="hero-img" src="/uploads/hero.svg" alt="" width="1920" height="1080" />
+    <img class="hero-img" src={heroImage} alt="" width="1920" height="1080" />
     <div class="hero-veil"></div>
     <div class="container hero-content">
       <p class="eyebrow">{SITE.tagline}</p>
