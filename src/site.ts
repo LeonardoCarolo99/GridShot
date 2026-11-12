@@ -1,10 +1,10 @@
 // Single source of truth for site identity. Edit these values to make it yours.
 export const SITE = {
-  name: 'APEXLENS', // nav brand
-  tagline: 'Motorsport Photographer',
+  name: 'GRIDSHOT', // nav brand
+  tagline: 'Motorsport Photography',
   photographer: 'LEONARDO CAROLO',
   location: 'Based in Portugal',
-  email: 'hello@yourdomain.com',
-  instagram: 'https://instagram.com/yourhandle',
-  instagramHandle: '@yourhandle',
+  email: 'thegridshot@outlook.com',
+  instagram: 'https://instagram.com/gridshotphotos',
+  instagramHandle: '@gridshotphotos',
 };

@@ -16,7 +16,7 @@ const isActive = (href: string) =>
 <header class="nav">
   <div class="container nav-inner">
     <a class="brand" href="/">
-      <span class="brand-mark" aria-hidden="true"></span>
+      <img class="brand-mark" src="/logo-gs.webp" alt="" width="471" height="160" />
       <span class="brand-text">{SITE.name}</span>
     </a>
 
@@ -72,10 +72,8 @@ const isActive = (href: string) =>
   }
 
   .brand-mark {
-    width: 12px;
-    height: 12px;
-    background: var(--accent);
-    transform: skew(-12deg);
+    height: 27px;
+    width: auto;
   }
 
   .links {
@@ -96,6 +94,19 @@ const isActive = (href: string) =>
     transition: color 0.15s;
   }
 
+  .links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+
   .links a:hover {
     color: var(--text);
   }
@@ -104,14 +115,9 @@ const isActive = (href: string) =>
     color: var(--text);
   }
 
+  .links a:hover::after,
   .links a.active::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -2px;
-    width: 100%;
-    height: 2px;
-    background: var(--accent);
+    transform: scaleX(1);
   }
 
   .burger {

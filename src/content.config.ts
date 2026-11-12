@@ -8,6 +8,7 @@ const events = defineCollection({
     date: z.coerce.date(),
     location: z.string(),
     series: z.string().optional(),
+    type: z.string().optional(),
     cover: z.string(),
     description: z.string(),
     // Allow events saved without a gallery — default to an empty list.

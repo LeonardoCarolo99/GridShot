@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "motorsport-photography",
+  "compatibility_date": "2026-11-12",
+  // Static site: Astro writes the whole site to dist/, Workers serves it as assets.
+  "assets": {
+    "directory": "./dist"
+  }
+}

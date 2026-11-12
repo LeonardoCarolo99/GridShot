@@ -19,9 +19,9 @@ const dateStr = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long'
 
 <Layout title={`${title} — ${SITE.name}`} description={description}>
   <section class="event-head">
-    <img class="head-img" src={cover} alt={`${title} cover`} width="1600" height="1000" />
+    <img class="head-img" src={cover} alt={`${title} cover`} width="1600" height="1000" data-hero-media />
     <div class="head-veil"></div>
-    <div class="container head-content">
+    <div class="container head-content" data-hero-copy>
       <p class="eyebrow">{series ?? 'Event'}</p>
       <h1>{title}</h1>
       <p class="meta">
@@ -34,7 +34,7 @@ const dateStr = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long'
 
   <section class="section">
     <div class="container">
-      <div class="section-head">
+      <div class="section-head" data-reveal>
         <div>
           <p class="eyebrow">Gallery</p>
           <h2>{photos.length} photographs</h2>

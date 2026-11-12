@@ -1,4 +1,11 @@
 {
-  "hero": "",
-  "photos": []
+  "hero": "/uploads/WRC Portugal 2026/hero.png",
+  "photos": [
+    "/uploads/PowerArena/civictyper.webp",
+    "/uploads/PowerArena/r8.webp",
+    "/uploads/Estoril Experience Day 1 2026/AMG GTR.webp",
+    "/uploads/GatheringSupercars2026/ferrari.webp",
+    "/uploads/WRC Portugal 2026/hero.png",
+    "/uploads/WRC Portugal 2026/FafeJump.webp"
+  ]
 }

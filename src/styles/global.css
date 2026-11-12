@@ -50,13 +50,28 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  /* Faint accent glow, fixed so it stays as a light source while scrolling. */
+  background-color: var(--bg);
+  background-image: radial-gradient(620px circle at 82% -8%, rgba(225, 6, 0, 0.06), transparent 70%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Static film grain: photographic texture and it hides banding in the dark hero gradient. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 h1,
@@ -157,16 +172,19 @@ button {
   border: 1px solid var(--accent);
   color: #fff;
   background: var(--accent);
-  transition: background 0.2s, color 0.2s, transform 0.15s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s ease, box-shadow 0.25s ease;
 }
 
 .btn:hover {
   background: var(--accent-bright);
   border-color: var(--accent-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -8px rgba(255, 26, 18, 0.55);
 }
 
 .btn:active {
   transform: translateY(1px);
+  box-shadow: none;
 }
 
 .btn.ghost {
@@ -176,8 +194,10 @@ button {
 }
 
 .btn.ghost:hover {
+  background: transparent;
   border-color: var(--accent);
   color: var(--accent);
+  box-shadow: 0 10px 30px -12px rgba(225, 6, 0, 0.35);
 }
 
 .visually-hidden {
@@ -211,4 +231,83 @@ button {
 
 .site-footer a:hover {
   color: var(--accent);
+}
+
+/* ---- Motion ---- */
+
+/* Scroll reveal. Gated on .js so content never stays hidden without JavaScript.
+   `translate` is separate from `transform`, so hover transforms still work. */
+.js [data-reveal] {
+  opacity: 0;
+  translate: 0 26px;
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    translate 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  translate: none;
+}
+
+/* Hero entrance: the photo settles while the copy rises in sequence. */
+[data-hero-media] {
+  animation: hero-settle 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+[data-hero-copy] > * {
+  animation: rise-in 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+[data-hero-copy] > :nth-child(1) {
+  animation-delay: 0.05s;
+}
+[data-hero-copy] > :nth-child(2) {
+  animation-delay: 0.15s;
+}
+[data-hero-copy] > :nth-child(3) {
+  animation-delay: 0.25s;
+}
+[data-hero-copy] > :nth-child(4) {
+  animation-delay: 0.35s;
+}
+
+@keyframes hero-settle {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .js [data-reveal] {
+    opacity: 1;
+    translate: none;
+  }
 }

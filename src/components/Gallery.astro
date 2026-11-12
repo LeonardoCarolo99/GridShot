@@ -9,7 +9,7 @@ const { photos, alt = 'Motorsport photograph' } = Astro.props;
 
 <div class="gallery" data-gallery>
   {photos.map((src, i) => (
-    <figure class="item" data-src={src}>
+    <figure class="item" data-src={src} data-reveal style={`--reveal-delay:${Math.min(i, 6) * 60}ms`}>
       <img src={src} alt={`${alt} ${i + 1}`} loading="lazy" />
     </figure>
   ))}
@@ -76,6 +76,11 @@ const { photos, alt = 'Motorsport photograph' } = Astro.props;
     border-radius: 4px;
     overflow: hidden;
     background: var(--surface);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .gallery .item:hover {
+    box-shadow: 0 14px 34px -14px rgba(225, 6, 0, 0.45);
   }
 
   .gallery img {
@@ -101,6 +106,27 @@ const { photos, alt = 'Motorsport photograph' } = Astro.props;
 
   .lightbox[hidden] {
     display: none;
+  }
+
+  .lightbox:not([hidden]) {
+    animation: lb-fade 0.22s ease both;
+  }
+
+  .lightbox:not([hidden]) .lb-img {
+    animation: lb-zoom 0.3s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  @keyframes lb-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes lb-zoom {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
   }
 
   .lb-img {

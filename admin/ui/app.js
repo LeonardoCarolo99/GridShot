@@ -4,6 +4,8 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+const thumb = (src) => (src.startsWith('/uploads/') ? '/thumbs/' + src.slice('/uploads/'.length) : src);
+
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 let events = [];
@@ -60,7 +62,7 @@ function renderSidebar() {
       .map(
         (e) => `
       <button class="event-item ${current && current.slug === e.slug ? 'active' : ''}" data-slug="${esc(e.slug)}">
-        <img src="${esc(e.cover)}" alt="" loading="lazy" />
+        <img src="${esc(thumb(e.cover))}" alt="" loading="lazy" />
         <span class="ei-text"><strong>${esc(e.title)}</strong><small>${esc(e.date)}</small></span>
       </button>`
       )
@@ -95,7 +97,7 @@ async function openEvent(slug) {
 
 function newEvent() {
   if (!confirmDiscard()) return;
-  current = { title: '', date: todayISO(), location: '', series: '', cover: '', description: '', photos: [] };
+  current = { title: '', date: todayISO(), location: '', type: '', series: '', cover: '', description: '', photos: [] };
   isNew = true;
   dirty = false;
   renderSidebar();
@@ -107,7 +109,7 @@ function newEvent() {
 
 function thumbHtml(src, i) {
   return `<div class="thumb" draggable="true" data-index="${i}">
-    <img src="${esc(src)}" alt="" />
+    <img src="${esc(thumb(src))}" alt="" />
     <button class="thumb-remove" data-remove="${i}" aria-label="Remove photo">&times;</button>
   </div>`;
 }
@@ -195,6 +197,7 @@ function renderEditor() {
       <label>Title<input data-field="title" value="${esc(c.title)}" placeholder="WRC Portugal 2026" /></label>
       <label>Date<input type="date" data-field="date" value="${esc(c.date)}" /></label>
       <label>Location<input data-field="location" value="${esc(c.location)}" placeholder="Fafe, Portugal" /></label>
+      <label>Type<input data-field="type" value="${esc(c.type)}" placeholder="Car Meet, Track Day..." /></label>
       <label>Series<input data-field="series" value="${esc(c.series)}" placeholder="World Rally Championship" /></label>
       <label class="full">Description<textarea data-field="description" rows="3" placeholder="A short intro for the event page.">${esc(c.description)}</textarea></label>
     </div>
@@ -207,7 +210,7 @@ function renderEditor() {
       <div class="cover ${c.cover ? 'has' : ''}" data-cover>
         ${
           c.cover
-            ? `<img src="${esc(c.cover)}" alt="Cover" /><button class="cover-change btn ghost small" data-cover-change>Replace</button>`
+            ? `<img src="${esc(thumb(c.cover))}" alt="Cover" /><button class="cover-change btn ghost small" data-cover-change>Replace</button>`
             : `<div class="cover-empty">Drag an image here, or click to upload</div>`
         }
       </div>
@@ -246,7 +249,7 @@ function wireEditor() {
       if (paths[0]) current.cover = paths[0];
       dirty = true;
       renderEditor();
-    })
+    }, false)
   );
 
   const cover = $('[data-cover]');
@@ -316,7 +319,7 @@ function renderPortfolio() {
       <div class="cover ${portfolio.hero ? 'has' : ''}" data-hero>
         ${
           portfolio.hero
-            ? `<img src="${esc(portfolio.hero)}" alt="Hero" /><button class="cover-change btn ghost small" data-hero-change>Replace</button>`
+            ? `<img src="${esc(thumb(portfolio.hero))}" alt="Hero" /><button class="cover-change btn ghost small" data-hero-change>Replace</button>`
             : `<div class="cover-empty">Drag an image here, or click to upload (PNG, JPG, WebP)</div>`
         }
       </div>
@@ -360,7 +363,7 @@ function wireHero() {
       if (paths[0]) portfolio.hero = paths[0];
       portfolioDirty = true;
       renderPortfolio();
-    })
+    }, false)
   );
 
   const hero = $('[data-hero]');
@@ -424,37 +427,54 @@ function readAsDataURL(file) {
   });
 }
 
-async function uploadFile(file) {
+// Keep new uploads beside the event's photos, never loose in the uploads root.
+function uploadFolder() {
+  if (view === 'portfolio') return 'portfolio';
+  const cover = current?.cover || '';
+  const end = cover.lastIndexOf('/');
+  if (cover.startsWith('/uploads/') && end > '/uploads'.length) return cover.slice('/uploads/'.length, end);
+  return (
+    String(current?.title || '')
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'events'
+  );
+}
+
+async function uploadFile(file, folder = uploadFolder()) {
   const dataUrl = await readAsDataURL(file);
   const { path } = await api('/api/uploads', {
     method: 'POST',
-    body: JSON.stringify({ name: file.name, dataUrl }),
+    body: JSON.stringify({ name: file.name, dataUrl, folder }),
   });
   return path;
 }
 
-async function openLibrary(onPick) {
+const FOLDER_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" fill="currentColor"/></svg>';
+
+async function openLibrary(onPick, multiple = true) {
   uploads = await api('/api/uploads');
   const modal = $('#modal');
   modal.innerHTML = `
     <div class="modal-card">
       <div class="modal-head">
-        <h2>Media library</h2>
+        <div class="lib-title">
+          <button class="btn ghost small" data-up hidden>← Back</button>
+          <h2 data-lib-title>Media library</h2>
+        </div>
         <button class="btn ghost small" data-close>Close</button>
       </div>
-      <div class="lib-grid">
-        ${
-          uploads
-            .map(
-              (u) => `<button class="lib-item" data-path="${esc(u.path)}" title="${esc(u.name)}"><img src="${esc(u.path)}" alt="" loading="lazy" /></button>`
-            )
-            .join('') || '<p class="empty">Nothing uploaded yet.</p>'
-        }
-      </div>
+      <div class="lib-grid" data-lib-grid></div>
       <div class="modal-foot">
-        <span class="muted">Click an image to select.</span>
-        <input type="file" accept="image/*" multiple hidden data-lib-upload />
-        <button class="btn" data-lib-upload-btn>Upload new</button>
+        <span class="muted" data-lib-hint></span>
+        <div class="modal-actions">
+          <input type="file" accept="image/*" multiple hidden data-lib-upload />
+          <button class="btn" data-lib-add hidden></button>
+          <button class="btn ghost" data-lib-upload-btn>Upload new</button>
+        </div>
       </div>
     </div>`;
 
@@ -464,22 +484,106 @@ async function openLibrary(onPick) {
     modal.innerHTML = '';
   };
 
+  let folder = '';
+  const selected = new Set();
+
+  const updateFoot = () => {
+    const n = selected.size;
+    const add = $('[data-lib-add]', modal);
+    add.hidden = !multiple;
+    add.disabled = !n;
+    add.textContent = n ? `Add ${n} photo${n === 1 ? '' : 's'}` : 'Add selected';
+    $('[data-lib-hint]', modal).textContent = folder
+      ? n
+        ? `${n} selected`
+        : multiple
+          ? 'Click photos to select.'
+          : 'Click an image to select.'
+      : n
+        ? `${n} selected across folders`
+        : 'Open a folder to view its photos.';
+  };
+
+  const render = () => {
+    const prefix = folder ? folder + '/' : '';
+    const folders = new Map();
+    const images = [];
+    for (const u of uploads) {
+      if (!u.name.startsWith(prefix)) continue;
+      const rest = u.name.slice(prefix.length);
+      const slash = rest.indexOf('/');
+      if (slash < 0) images.push(u);
+      else {
+        const name = rest.slice(0, slash);
+        folders.set(name, (folders.get(name) || 0) + 1);
+      }
+    }
+
+    const tiles = [...folders]
+      .map(
+        ([name, count]) => `
+      <button class="lib-item lib-folder" data-folder="${esc(prefix + name)}" title="${esc(name)}">
+        ${FOLDER_ICON}
+        <span class="folder-name">${esc(name)}</span>
+        <span class="folder-count">${count} photo${count === 1 ? '' : 's'}</span>
+      </button>`
+      )
+      .join('');
+
+    $('[data-lib-title]', modal).textContent = folder || 'Media library';
+    $('[data-up]', modal).hidden = !folder;
+    $('[data-lib-grid]', modal).innerHTML =
+      tiles +
+      images
+        .map(
+          (u) =>
+            `<button class="lib-item${selected.has(u.path) ? ' selected' : ''}" data-path="${esc(u.path)}" title="${esc(u.name)}"><img src="${esc(thumb(u.path))}" alt="" loading="lazy" /></button>`
+        )
+        .join('') || '<p class="empty">No images here.</p>';
+
+    $('[data-up]', modal).onclick = () => {
+      folder = folder.split('/').slice(0, -1).join('/');
+      render();
+    };
+    $$('[data-folder]', modal).forEach((b) => {
+      b.onclick = () => {
+        folder = b.dataset.folder;
+        render();
+      };
+    });
+    $$('[data-path]', modal).forEach((b) => {
+      b.onclick = () => {
+        if (!multiple) {
+          onPick([b.dataset.path]);
+          close();
+          return;
+        }
+        if (selected.has(b.dataset.path)) selected.delete(b.dataset.path);
+        else selected.add(b.dataset.path);
+        b.classList.toggle('selected', selected.has(b.dataset.path));
+        updateFoot();
+      };
+    });
+    updateFoot();
+  };
+
+  render();
+
   $('[data-close]', modal).onclick = close;
   modal.addEventListener('click', (e) => {
     if (e.target === modal) close();
   });
-  $$('.lib-item', modal).forEach((b) => {
-    b.onclick = () => {
-      onPick([b.dataset.path]);
-      close();
-    };
-  });
+  $('[data-lib-add]', modal).onclick = () => {
+    if (!selected.size) return;
+    onPick([...selected]);
+    close();
+  };
 
   const upInput = $('[data-lib-upload]', modal);
   $('[data-lib-upload-btn]', modal).onclick = () => upInput.click();
   upInput.onchange = async () => {
     const added = [];
-    for (const f of [...upInput.files]) added.push(await uploadFile(f));
+    for (const f of [...upInput.files]) added.push(await uploadFile(f, folder || undefined));
     if (added.length) {
       onPick(added);
       close();

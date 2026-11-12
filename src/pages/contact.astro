@@ -6,44 +6,24 @@ import { SITE } from '../site';
 <Layout title={`Contact — ${SITE.name}`} description={`Get in touch with ${SITE.photographer} for motorsport photography.`}>
   <section class="section">
     <div class="container">
-      <p class="eyebrow">Contact</p>
-      <h1>Let's work together</h1>
-      <p class="lead">
-        Event coverage, team commissions or editorial — send a message and I'll get back to you.
-        Prefer email? Reach me at <a class="mailto" href={`mailto:${SITE.email}`}>{SITE.email}</a>.
-      </p>
+      <div data-reveal>
+        <p class="eyebrow">Contact</p>
+        <h1>Let's work together</h1>
+        <p class="lead">
+          Event coverage, team commissions or editorial — tell me what you're planning and I'll get back to you.
+        </p>
+      </div>
 
       <div class="contact-grid">
-        <form class="form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-          <input type="hidden" name="form-name" value="contact" />
-          <p class="visually-hidden">
-            <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+        <div class="cta" data-reveal>
+          <p>
+            The quickest way to reach me is email. Include the event, dates and roughly what you need,
+            and I'll reply within a couple of days.
           </p>
+          <a class="btn" href={`mailto:${SITE.email}?subject=${encodeURIComponent('Project enquiry')}`}>Send an email</a>
+        </div>
 
-          <div class="field">
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" required autocomplete="name" />
-          </div>
-
-          <div class="field">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" required autocomplete="email" />
-          </div>
-
-          <div class="field">
-            <label for="subject">Subject</label>
-            <input id="subject" name="subject" type="text" />
-          </div>
-
-          <div class="field">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" rows="6" required></textarea>
-          </div>
-
-          <button class="btn" type="submit">Send message</button>
-        </form>
-
-        <aside class="direct">
+        <aside class="direct" data-reveal style="--reveal-delay:100ms">
           <h3>Direct</h3>
           <ul>
             <li>
@@ -66,10 +46,6 @@ import { SITE } from '../site';
 </Layout>
 
 <style>
-  .mailto {
-    color: var(--accent);
-  }
-
   .contact-grid {
     display: grid;
     grid-template-columns: 1.4fr 1fr;
@@ -77,50 +53,17 @@ import { SITE } from '../site';
     margin-top: clamp(2rem, 5vw, 3rem);
   }
 
-  .form {
+  .cta {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    align-items: flex-start;
+    gap: 1.5rem;
   }
 
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .field label {
-    font-family: var(--font-head);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.78rem;
+  .cta p {
+    margin: 0;
     color: var(--muted);
-  }
-
-  .field input,
-  .field textarea {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 1rem;
-    padding: 0.75rem 0.9rem;
-    transition: border-color 0.15s;
-  }
-
-  .field input:focus,
-  .field textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  .field textarea {
-    resize: vertical;
-  }
-
-  .form .btn {
-    align-self: flex-start;
+    max-width: 44ch;
   }
 
   .direct {

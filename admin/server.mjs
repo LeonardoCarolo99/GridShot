@@ -6,6 +6,7 @@ import { promises as fs } from 'node:fs';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -14,6 +15,7 @@ const UPLOADS_DIR = path.join(ROOT, 'public', 'uploads');
 const DATA_DIR = path.join(ROOT, 'src', 'data');
 const PORTFOLIO_FILE = path.join(DATA_DIR, 'portfolio.json');
 const UI_DIR = path.join(__dirname, 'ui');
+const THUMBS_DIR = path.join(__dirname, '.thumbs');
 const PORT = Number(process.env.ADMIN_PORT || 4000);
 const MAX_BODY = 80 * 1024 * 1024;
 
@@ -41,8 +43,8 @@ const IMAGE_EXT_BY_MIME = {
 
 // ---------- helpers ----------
 
-const send = (res, status, body, type = 'application/json') => {
-  res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store' });
+const send = (res, status, body, type = 'application/json', cache = 'no-store') => {
+  res.writeHead(status, { 'Content-Type': type, 'Cache-Control': cache });
   res.end(body);
 };
 const json = (res, status, obj) => send(res, status, JSON.stringify(obj));
@@ -109,6 +111,7 @@ function stringifyFrontmatter(d) {
   out.push(`title: ${yq(d.title)}`);
   out.push(`date: ${d.date}`);
   out.push(`location: ${yq(d.location)}`);
+  if (d.type) out.push(`type: ${yq(d.type)}`);
   if (d.series) out.push(`series: ${yq(d.series)}`);
   out.push(`cover: ${yq(d.cover)}`);
   out.push(`description: ${yq(d.description)}`);
@@ -128,6 +131,7 @@ function normalizeEvent(d) {
     date: d.date ?? '',
     location: d.location ?? '',
     series: d.series ?? '',
+    type: d.type ?? '',
     cover: d.cover ?? '',
     description: d.description ?? '',
     photos: Array.isArray(d.photos) ? d.photos.filter(Boolean) : [],
@@ -153,24 +157,40 @@ async function writeEvent(slug, data) {
 }
 
 async function listUploads() {
-  const files = await fs.readdir(UPLOADS_DIR).catch(() => []);
-  return files
-    .filter((f) => /\.(jpe?g|png|webp|gif|svg|avif)$/i.test(f))
-    .map((f) => ({ name: f, path: '/uploads/' + f }));
+  const out = [];
+  const walk = async (dir, prefix = '') => {
+    const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
+    for (const entry of entries) {
+      if (entry.name.startsWith('.')) continue;
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) await walk(path.join(dir, entry.name), rel);
+      else if (/\.(jpe?g|png|webp|gif|svg|avif)$/i.test(entry.name)) out.push({ name: rel, path: '/uploads/' + rel });
+    }
+  };
+  await walk(UPLOADS_DIR);
+  return out;
 }
 
-async function saveUpload({ name = 'photo', dataUrl }) {
+async function saveUpload({ name = 'photo', dataUrl, folder = '' }) {
   const m = /^data:([^;]+);base64,([\s\S]*)$/.exec(dataUrl || '');
   if (!m) throw new Error('Invalid image data');
   const mime = m[1];
   const buf = Buffer.from(m[2], 'base64');
   const ext = IMAGE_EXT_BY_MIME[mime] || path.extname(name).toLowerCase() || '.jpg';
+  // Reuse an identical file (including ones in subfolders) instead of writing a duplicate copy.
+  for (const upload of await listUploads()) {
+    const existing = path.join(UPLOADS_DIR, upload.path.slice('/uploads/'.length));
+    if ((await fs.stat(existing)).size === buf.length && buf.equals(await fs.readFile(existing))) return upload.path;
+  }
+  const rel = String(folder).replace(/\\/g, '/').split('/').filter((s) => s && s !== '.' && s !== '..').join('/');
+  const dir = path.join(UPLOADS_DIR, rel);
   const base = slugify(name.replace(/\.[^.]+$/, ''));
   let file = base + ext;
   let i = 1;
-  while (existsSync(path.join(UPLOADS_DIR, file))) file = `${base}-${i++}${ext}`;
-  await fs.writeFile(path.join(UPLOADS_DIR, file), buf);
-  return '/uploads/' + file;
+  while (existsSync(path.join(dir, file))) file = `${base}-${i++}${ext}`;
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(dir, file), buf);
+  return '/uploads/' + (rel ? rel + '/' : '') + file;
 }
 
 async function readPortfolio() {
@@ -216,6 +236,24 @@ async function serveFile(res, filePath) {
   if (!allowed || !existsSync(resolved)) return send(res, 404, 'Not found', 'text/plain');
   const buf = await fs.readFile(resolved);
   send(res, 200, buf, MIME[path.extname(resolved).toLowerCase()] || 'application/octet-stream');
+}
+
+async function serveThumb(res, name) {
+  const rel = decodeURIComponent(name);
+  const src = path.resolve(UPLOADS_DIR, rel);
+  if (!src.startsWith(UPLOADS_DIR + path.sep) || !existsSync(src)) return send(res, 404, 'Not found', 'text/plain');
+  const dest = path.join(THUMBS_DIR, rel + '.webp');
+  try {
+    const fresh = existsSync(dest) && (await fs.stat(dest)).mtimeMs >= (await fs.stat(src)).mtimeMs;
+    if (!fresh) {
+      await fs.mkdir(path.dirname(dest), { recursive: true });
+      await sharp(src).resize({ width: 400, withoutEnlargement: true }).webp({ quality: 70 }).toFile(dest);
+    }
+    return send(res, 200, await fs.readFile(dest), 'image/webp', 'public, max-age=3600');
+  } catch {
+    // Unreadable image (or thumbnail race): fall back to the original file.
+    return serveFile(res, src);
+  }
 }
 
 async function api(req, res, p) {
@@ -288,6 +326,9 @@ const server = http.createServer(async (req, res) => {
     if (p.startsWith('/api/')) return await api(req, res, p);
     if (p.startsWith('/uploads/')) {
       return await serveFile(res, path.join(UPLOADS_DIR, decodeURIComponent(p.slice('/uploads/'.length))));
+    }
+    if (p.startsWith('/thumbs/')) {
+      return await serveThumb(res, p.slice('/thumbs/'.length));
     }
     if (p === '/' || p === '/index.html') return await serveFile(res, path.join(UI_DIR, 'index.html'));
     if (p === '/app.js') return await serveFile(res, path.join(UI_DIR, 'app.js'));

@@ -6,35 +6,35 @@ import { SITE } from '../site';
 <Layout title={`About — ${SITE.name}`} description={`About ${SITE.photographer}, ${SITE.tagline.toLowerCase()}.`}>
   <section class="section">
     <div class="container">
-      <p class="eyebrow">About me</p>
-      <h1>{SITE.photographer}</h1>
-      <p class="lead">{SITE.tagline} — {SITE.location}</p>
+      <div data-reveal>
+        <p class="eyebrow">About me</p>
+        <h1>{SITE.photographer}</h1>
+        <p class="lead">{SITE.tagline} — {SITE.location}</p>
+      </div>
 
       <div class="about-grid">
-        <div class="bio">
+        <div class="bio" data-reveal>
           <p>
-            Replace this with your story. Explain how you got into motorsport photography,
-            the series you cover, and what you bring to a team or publication: reliability,
-            access, and images that capture the speed and drama of the sport.
+            I've always been fascinated by cars and racing. A year ago, I decided to combine my passion for motorsport with my love for photography. Since then, I've been capturing the thrill and excitement of racing events, from the roar of engines to the intensity of competition.
+            I've travelled across the country to cover various events, and each experience has been a unique adventure. My goal is 
+            to capture the essence of racing and share it with the world.
           </p>
           <p>
-            Talk about the equipment you shoot with and the access you have, then close with
-            what a client gets when they hire you — fast delivery, edited selects, and
-            images ready for press or social.
+            I am still learning and growing as a motorsport photographer, but I am committed to improving my skills and delivering high-quality images that tell the story of each event.
           </p>
         </div>
 
         <aside class="facts">
-          <div class="fact">
-            <span class="fact-num">10+</span>
-            <span class="fact-label">Years shooting motorsport</span>
+          <div class="fact" data-reveal style="--reveal-delay:80ms">
+            <span class="fact-num">14</span>
+            <span class="fact-label">months shooting motorsport</span>
           </div>
-          <div class="fact">
-            <span class="fact-num">60+</span>
+          <div class="fact" data-reveal style="--reveal-delay:160ms">
+            <span class="fact-num">12</span>
             <span class="fact-label">Events covered</span>
           </div>
-          <div class="fact">
-            <span class="fact-num">120k</span>
+          <div class="fact" data-reveal style="--reveal-delay:240ms">
+            <span class="fact-num">2400+</span>
             <span class="fact-label">Photos delivered</span>
           </div>
         </aside>

@@ -9,11 +9,8 @@ const events = (await getCollection('events')).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 
-// Curated in the admin's Portfolio tab; falls back to recent event shots until set.
-const curated = Array.isArray(portfolio.photos) ? portfolio.photos.filter(Boolean) : [];
-const featured = curated.length
-  ? curated
-  : events.flatMap((e) => [e.data.cover, ...e.data.photos]).slice(0, 9);
+// Curated in the admin's Portfolio tab; empty until photos are picked there.
+const featured = Array.isArray(portfolio.photos) ? portfolio.photos.filter(Boolean) : [];
 
 const heroImage = portfolio.hero || events[0]?.data.cover || '/uploads/hero.svg';
 
@@ -22,9 +19,9 @@ const latest = events[0];
 
 <Layout title={`${SITE.name} — ${SITE.tagline}`}>
   <section class="hero">
-    <img class="hero-img" src={heroImage} alt="" width="1920" height="1080" />
+    <img class="hero-img" src={heroImage} alt="" width="1920" height="1080" data-hero-media />
     <div class="hero-veil"></div>
-    <div class="container hero-content">
+    <div class="container hero-content" data-hero-copy>
       <p class="eyebrow">{SITE.tagline}</p>
       <h1>Capturing<br /><span class="accent">Speed</span> at its limit</h1>
       <p class="lead">Rally, GT and single-seater action — photographed trackside for teams, drivers and media.</p>
@@ -33,25 +30,33 @@ const latest = events[0];
         <a class="btn ghost" href="/contact/">Work with me</a>
       </div>
     </div>
+    {featured.length > 0 && (
+      <a class="scroll-cue" href="#portfolio">
+        <span>Check out some of my work</span>
+        <span class="scroll-cue-arrow" aria-hidden="true"></span>
+      </a>
+    )}
   </section>
 
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Selected work</p>
-          <h2>Portfolio</h2>
+  {featured.length > 0 && (
+    <section class="section" id="portfolio">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">Selected work</p>
+            <h2>Portfolio</h2>
+          </div>
+          <a class="btn ghost" href="/events/">All events</a>
         </div>
-        <a class="btn ghost" href="/events/">All events</a>
+        <Gallery photos={featured} />
       </div>
-      <Gallery photos={featured} />
-    </div>
-  </section>
+    </section>
+  )}
 
   {latest && (
     <section class="section latest">
       <div class="container">
-        <div class="latest-card">
+        <div class="latest-card" data-reveal>
           <div class="latest-copy">
             <p class="eyebrow">Latest event</p>
             <h2>{latest.data.title}</h2>
@@ -92,7 +97,7 @@ const latest = events[0];
 
   .hero-content {
     position: relative;
-    padding-bottom: clamp(3rem, 8vw, 6rem);
+    padding-bottom: clamp(5rem, 9vw, 7rem);
   }
 
   .hero h1 {
@@ -109,41 +114,122 @@ const latest = events[0];
     gap: 0.75rem;
   }
 
-  .latest-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(1.5rem, 4vw, 3rem);
+  .scroll-cue {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(0.9rem, 2.2vw, 1.5rem);
+    translate: -50% 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.68rem;
+    line-height: 1.4;
+    color: var(--muted);
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+
+  .scroll-cue:hover {
+    color: var(--text);
+  }
+
+  .scroll-cue-arrow {
+    width: 9px;
+    height: 9px;
+    border-right: 1.5px solid var(--accent);
+    border-bottom: 1.5px solid var(--accent);
+    transform: rotate(45deg);
+    animation: cue-bob 1.8s ease-in-out infinite;
+  }
+
+  .scroll-cue:hover .scroll-cue-arrow {
+    border-color: var(--accent-bright);
+  }
+
+  @keyframes cue-bob {
+    50% {
+      translate: 0 4px;
+    }
+  }
+
+  #portfolio {
+    scroll-margin-top: calc(var(--nav-h) + 1rem);
+  }
+
+  /* The portfolio section already ends with breathing room, so this one starts tight. */
+  .latest {
+    padding-top: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .latest-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: clamp(320px, 38vw, 430px);
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: clamp(1.5rem, 4vw, 3rem);
+    overflow: hidden;
+  }
+
+  .latest-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 44ch;
+    padding: clamp(1.75rem, 4vw, 3rem);
   }
 
   .latest-cover {
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid var(--border);
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Dark-to-clear ramp keeps the copy legible and leaves the car visible. */
+  .latest-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(10, 10, 12, 0.9) 0%,
+      rgba(10, 10, 12, 0.55) 38%,
+      rgba(10, 10, 12, 0.05) 80%
+    );
   }
 
   .latest-cover img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    aspect-ratio: 16 / 10;
-    transition: transform 0.4s ease;
+    transition: transform 0.5s ease;
   }
 
-  .latest-cover:hover img {
+  .latest-card:hover .latest-cover img {
     transform: scale(1.03);
   }
 
   @media (max-width: 720px) {
     .latest-card {
-      grid-template-columns: 1fr;
+      align-items: flex-end;
+      min-height: 420px;
     }
-    .latest-cover {
-      order: -1;
+
+    .latest-copy {
+      padding: 1.5rem;
+    }
+
+    .latest-cover::after {
+      background: linear-gradient(
+        180deg,
+        rgba(10, 10, 12, 0.2) 0%,
+        rgba(10, 10, 12, 0.75) 55%,
+        rgba(10, 10, 12, 0.95) 100%
+      );
     }
   }
 </style>

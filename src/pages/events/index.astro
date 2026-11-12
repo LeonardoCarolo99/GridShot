@@ -12,20 +12,25 @@ const events = (await getCollection('events')).sort(
 <Layout title={`Events — ${SITE.name}`} description="Motorsport events I've photographed — rally, GT and single-seater coverage.">
   <section class="section">
     <div class="container">
-      <p class="eyebrow">Coverage</p>
-      <h1>Events</h1>
-      <p class="lead">Every event, one gallery at a time. Click an event to see the full set of photographs.</p>
+      <div data-reveal>
+        <p class="eyebrow">Coverage</p>
+        <h1>Events</h1>
+        <p class="lead">Every event, one gallery at a time. Click an event to see the full set of photographs.</p>
+      </div>
 
       <div class="grid">
-        {events.map((event) => (
-          <EventCard
-            href={`/events/${event.id}/`}
-            title={event.data.title}
-            date={event.data.date}
-            location={event.data.location}
-            series={event.data.series}
-            cover={event.data.cover}
-          />
+        {events.map((event, i) => (
+          <div data-reveal style={`--reveal-delay:${Math.min(i, 6) * 70}ms`}>
+            <EventCard
+              href={`/events/${event.id}/`}
+              title={event.data.title}
+              date={event.data.date}
+              location={event.data.location}
+              series={event.data.series}
+              type={event.data.type}
+              cover={event.data.cover}
+            />
+          </div>
         ))}
       </div>
     </div>
@@ -38,5 +43,10 @@ const events = (await getCollection('events')).sort(
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: clamp(1rem, 2.5vw, 1.75rem);
     margin-top: clamp(2rem, 5vw, 3rem);
+  }
+
+  /* Reveal wrapper: keeps cards full height inside their grid row. */
+  .grid > * {
+    display: grid;
   }
 </style>
