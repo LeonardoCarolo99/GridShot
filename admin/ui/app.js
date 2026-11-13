@@ -63,7 +63,11 @@ function renderSidebar() {
         (e) => `
       <button class="event-item ${current && current.slug === e.slug ? 'active' : ''}" data-slug="${esc(e.slug)}">
         <img src="${esc(thumb(e.cover))}" alt="" loading="lazy" />
-        <span class="ei-text"><strong>${esc(e.title)}</strong><small>${esc(e.date)}</small></span>
+        <span class="ei-text"><strong>${esc(e.title)}</strong><small>${esc(e.date)}${
+          (current && current.slug === e.slug ? current.draft : e.draft)
+            ? ' · <span class="draft">Hidden</span>'
+            : ''
+        }</small></span>
       </button>`
       )
       .join('') || '<p class="empty">No events yet.</p>';
@@ -97,7 +101,7 @@ async function openEvent(slug) {
 
 function newEvent() {
   if (!confirmDiscard()) return;
-  current = { title: '', date: todayISO(), location: '', type: '', series: '', cover: '', description: '', photos: [] };
+  current = { title: '', date: todayISO(), location: '', type: '', series: '', cover: '', description: '', photos: [], draft: true };
   isNew = true;
   dirty = false;
   renderSidebar();
@@ -188,6 +192,10 @@ function renderEditor() {
         <h1>${esc(c.title || 'Untitled event')}</h1>
       </div>
       <div class="actions">
+        <label class="draft-toggle" title="Draft events are not listed or built on the site">
+          <input type="checkbox" data-draft ${c.draft ? 'checked' : ''} />
+          Hidden
+        </label>
         ${isNew ? '' : '<button class="btn ghost" data-del>Delete</button>'}
         <button class="btn" data-save>Save</button>
       </div>
@@ -243,6 +251,12 @@ function wireEditor() {
 
   $('[data-save]')?.addEventListener('click', save);
   $('[data-del]')?.addEventListener('click', removeEvent);
+
+  $('[data-draft]')?.addEventListener('change', (e) => {
+    current.draft = e.target.checked;
+    dirty = true;
+    renderSidebar();
+  });
 
   $('[data-cover-library]')?.addEventListener('click', () =>
     openLibrary((paths) => {

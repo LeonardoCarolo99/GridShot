@@ -251,6 +251,30 @@ label.full {
   grid-column: 1 / -1;
 }
 
+/* Inline toggle inside .actions, not a stacked form label. */
+.draft-toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.3rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.draft-toggle input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.draft {
+  color: var(--accent);
+  font-family: var(--font-head);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 input,
 textarea {
   background: var(--surface);

@@ -115,6 +115,7 @@ function stringifyFrontmatter(d) {
   if (d.series) out.push(`series: ${yq(d.series)}`);
   out.push(`cover: ${yq(d.cover)}`);
   out.push(`description: ${yq(d.description)}`);
+  if (d.draft) out.push('draft: true');
   if (Array.isArray(d.photos) && d.photos.length) {
     out.push('photos:');
     for (const p of d.photos) out.push(`  - ${yq(p)}`);
@@ -134,6 +135,7 @@ function normalizeEvent(d) {
     type: d.type ?? '',
     cover: d.cover ?? '',
     description: d.description ?? '',
+    draft: d.draft === true || d.draft === 'true',
     photos: Array.isArray(d.photos) ? d.photos.filter(Boolean) : [],
   };
 }

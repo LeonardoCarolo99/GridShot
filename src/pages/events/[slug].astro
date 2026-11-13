@@ -5,7 +5,8 @@ import Gallery from '../../components/Gallery.astro';
 import { SITE } from '../../site';
 
 export async function getStaticPaths() {
-  const events = await getCollection('events');
+  // Draft events get no page at all.
+  const events = await getCollection('events', ({ data }) => !data.draft);
   return events.map((event) => ({
     params: { slug: event.id },
     props: { event },

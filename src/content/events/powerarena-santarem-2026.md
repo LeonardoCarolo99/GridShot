@@ -5,7 +5,7 @@ location: "Santarem, Portugal"
 type: "Motorsport Festival"
 series: "PowerArena Santarem 2026"
 cover: "/uploads/PowerArena/r8.webp"
-description: "test"
+description: "This event was a blast. It was my first time attending an actual drift event and it was truly amazing. The Turbo flutter, the smell of burnt rubber... \nThe only sad part was running out of batteries before i got to see the Demolition Derby. It was an amazing weekend. \nI'm really happy to know there will be another edition this year. I'm not missing it for sure."
 photos:
   - "/uploads/PowerArena/bmwm2.webp"
   - "/uploads/PowerArena/civictyper.webp"

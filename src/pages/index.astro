@@ -5,7 +5,7 @@ import Gallery from '../components/Gallery.astro';
 import { SITE } from '../site';
 import portfolio from '../data/portfolio.json';
 
-const events = (await getCollection('events')).sort(
+const events = (await getCollection('events', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 
@@ -24,10 +24,10 @@ const latest = events[0];
     <div class="container hero-content" data-hero-copy>
       <p class="eyebrow">{SITE.tagline}</p>
       <h1>Capturing<br /><span class="accent">Speed</span> at its limit</h1>
-      <p class="lead">Rally, GT and single-seater action — photographed trackside for teams, drivers and media.</p>
+      <p class="lead">Car Meets, Rally, Gran Turismo and more...</p>
       <div class="hero-actions">
         <a class="btn" href="/events/">View Events</a>
-        <a class="btn ghost" href="/contact/">Work with me</a>
+        <a class="btn ghost" href="/contact/">Contact me</a>
       </div>
     </div>
     {featured.length > 0 && (

@@ -13,6 +13,8 @@ const events = defineCollection({
     description: z.string(),
     // Allow events saved without a gallery — default to an empty list.
     photos: z.array(z.string()).default([]),
+    // Drafts are skipped by every page, so the event is not built or listed.
+    draft: z.boolean().default(false),
   }),
 });
 
